@@ -1,66 +1,162 @@
-import { useState,useRef,useEffect } from "react";
-import { Stage, Layer, Rect, Circle, RegularPolygon,Transformer } from "react-konva";
+import React, { useState, useRef } from "react";
+import { Stage, Layer, Rect, Circle } from "react-konva";
+import Toolbar from "./Toolbar";
+import Shapes from "./Shapes";
+import { v4 as uuidv4 } from "uuid";
 
-
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
-
-export default function Canvas() {
-  
+const Canvas = () => {
   const [shapes, setShapes] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedTool, setSelectedTool] = useState(null);
+  const [drawingShape, setDrawingShape] = useState(null);
 
-  const addShape = (type) => {
-    const newShape = {
-      id: Date.now(),
-      type,
-      x: Math.random() * (CANVAS_WIDTH - 80),
-      y: Math.random() * (CANVAS_HEIGHT - 60),
-      // color: '#' + Math.floor(Math.random()*16777215).toString(16)
-    };
-    setShapes([...shapes, newShape]);
+  const [selectionBox, setSelectionBox] = useState(null); // <-- NEW
+
+  const stageRef = useRef();
+
+  const handleMouseDown = (e) => {
+    const pos = e.target.getStage().getPointerPosition();
+
+    if (selectedTool) {
+      const newShape = {
+        id: uuidv4(),
+        type: selectedTool,
+        x: pos.x,
+        y: pos.y,
+        width: 0,
+        height: 0,
+        radius: 0,
+      };
+      setDrawingShape(newShape);
+    } else {
+      if (e.target === e.target.getStage()) {
+        // Start selection box if select mode
+        setSelectionBox({ x: pos.x, y: pos.y, width: 0, height: 0 });
+        setSelectedIds([]); // clear existing selection
+      }
+    }
   };
 
+  const handleMouseMove = (e) => {
+    const pos = e.target.getStage().getPointerPosition();
 
+    if (drawingShape) {
+      const { x, y } = drawingShape;
+      const width = pos.x - x;
+      const height = pos.y - y;
+      setDrawingShape({
+        ...drawingShape,
+        width,
+        height,
+        radius: Math.sqrt(width * width + height * height) / 2,
+      });
+    }
+
+    if (selectionBox) {
+      const { x, y } = selectionBox;
+      setSelectionBox({
+        ...selectionBox,
+        width: pos.x - x,
+        height: pos.y - y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (drawingShape) {
+      setShapes([...shapes, drawingShape]);
+      setDrawingShape(null);
+    }
+
+    if (selectionBox) {
+      const { x, y, width, height } = selectionBox;
+      const box = {
+        x: Math.min(x, x + width),
+        y: Math.min(y, y + height),
+        width: Math.abs(width),
+        height: Math.abs(height),
+      };
+
+      const selected = shapes
+        .filter((shape) => {
+          const sx = shape.x;
+          const sy = shape.y;
+          const sw = shape.width || shape.radius * 2;
+          const sh = shape.height || shape.radius * 2;
+
+          return (
+            sx >= box.x &&
+            sy >= box.y &&
+            sx + sw <= box.x + box.width &&
+            sy + sh <= box.y + box.height
+          );
+        })
+        .map((s) => s.id);
+
+      setSelectedIds(selected);
+      setSelectionBox(null);
+    }
+  };
 
   return (
-    <div className="p-4">
-      <div className="mb-4 flex gap-3">
-        <button onClick={() => addShape("rect")} className="mr-2 bg-blue-500 text-white px-4 py-2 rounded">Add Rectangle</button>
-      </div>
-      <Stage width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="border border-gray-300 bg-gray-50">
+    <div className="w-full h-[500px] border relative">
+      <Toolbar
+        onAddShape={() => {}}
+        selectedTool={selectedTool}
+        setSelectedTool={setSelectedTool}
+      />
+      <Stage
+        ref={stageRef}
+        width={window.innerWidth}
+        height={500}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
         <Layer>
-          <Rect
-            x={0}
-            y={0}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            fill="lightgray"
-            stroke="black"
-            strokeWidth={2}
+          <Shapes
+            shapes={shapes}
+            selectedIds={selectedIds}
+            setSelectedIds={setSelectedIds}
           />
-          {shapes.map((shape) => {
-            switch (shape.type) {
-              case "rect":
-                return (
-                  <Rect
-                    key={shape.id}
-                    x={shape.x}
-                    y={shape.y}
-                    width={80}
-                    height={60}
-                    fill="blue"
-                    onClick={(e) => handleSelect(shape.id, e)}
-                    draggable
-                  />
-                );
-              
-              default:
-                return null;
-            }
-          })}
-    
+
+          {/* Live Drawing Preview */}
+          {drawingShape && selectedTool === "rect" && (
+            <Rect
+              x={drawingShape.x}
+              y={drawingShape.y}
+              width={drawingShape.width}
+              height={drawingShape.height}
+              stroke="black"
+              dash={[4, 4]}
+            />
+          )}
+          {drawingShape && selectedTool === "circle" && (
+            <Circle
+              x={drawingShape.x + drawingShape.width / 2}
+              y={drawingShape.y + drawingShape.height / 2}
+              radius={drawingShape.radius}
+              stroke="black"
+              dash={[4, 4]}
+            />
+          )}
+
+          {/* Selection Box */}
+          {selectionBox && (
+            <Rect
+              x={selectionBox.x}
+              y={selectionBox.y}
+              width={selectionBox.width}
+              height={selectionBox.height}
+              stroke="blue"
+              dash={[4, 4]}
+              fill="rgba(0,0,255,0.1)"
+            />
+          )}
         </Layer>
       </Stage>
     </div>
   );
-}
+};
+
+export default Canvas;
