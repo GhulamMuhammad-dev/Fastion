@@ -1,0 +1,5 @@
+listening={false}
+It disables pointer events on that Rect, so clicks pass through to shapes above it.
+
+z-index
+The order in which shapes or layers are drawn
