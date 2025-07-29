@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Stage, Layer, Star, RegularPolygon, Arc } from "react-konva";
+import { Stage, Layer, Star, RegularPolygon, Arc, Path,Shape } from "react-konva";
 
 export default function StarPolygonDemo() {
   return (
@@ -42,6 +42,32 @@ export default function StarPolygonDemo() {
             stroke="black"
             strokeWidth={2}
             rotation={-60} // rotate arc
+            draggable
+          />
+
+          <Path
+            x={100}
+            y={250}
+            data="M20,20 C20,100 200,100 200,20" // SVG path data
+            stroke="purple"
+            strokeWidth={3}
+            draggable
+          />
+
+          {/* customshape  */}
+
+          <Shape
+            sceneFunc={(context, shape) => {
+              context.beginPath();
+              context.moveTo(20, 50);
+              context.lineTo(100, 150);
+              context.quadraticCurveTo(150, 50, 200, 150);
+              context.closePath();
+              context.fillStrokeShape(shape);
+            }}
+            fill="pink"
+            stroke="red"
+            strokeWidth={3}
             draggable
           />
         </Layer>

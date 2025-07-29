@@ -17,6 +17,9 @@ const ShapeManipulation = dynamic(() => import('../components/practice/ShapeMani
 const Image = dynamic(() => import('../components/practice/Image.jsx'), { ssr: false })
 const FreeHandDrawing = dynamic(() => import('../components/practice/FreeDrawingErase.jsx'), { ssr: false })
 const CustomShapes = dynamic(() => import('../components/practice/CustomShape.jsx'), { ssr: false })
+const AdvancedFill = dynamic(() => import('../components/practice/AdvancedFills.jsx'), { ssr: false })
+const Animation = dynamic(() => import('../components/practice/Animation.jsx'), { ssr: false })
+const Layers = dynamic(() => import('../components/practice/Layers.jsx'), { ssr: false })
 
 
 
@@ -27,7 +30,7 @@ export default function Page() {
     <main className="min-h-screen bg-gray-600">
         <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Konva Canvas Editor</h1>
-     <CustomShapes />
+     <Layers />
     </div>
     </main>
   )
