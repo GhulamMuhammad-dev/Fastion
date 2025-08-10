@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
+import SupabaseConnect from '@/components/SupabaseConnect.jsx'
 
 
 
@@ -21,6 +22,7 @@ const AdvancedFill = dynamic(() => import('../components/practice/AdvancedFills.
 const Animation = dynamic(() => import('../components/practice/Animation.jsx'), { ssr: false })
 const Layers = dynamic(() => import('../components/practice/Layers.jsx'), { ssr: false })
 const SaveLoadDemo = dynamic(() => import('../components/practice/SavingLoadingCanvas.jsx'), { ssr: false })
+const MyPractice = dynamic(() => import('../components/practice/MyPractice.jsx'), { ssr: false })
 
 
 
@@ -31,7 +33,7 @@ export default function Page() {
     <main className="min-h-screen bg-gray-600">
         <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Konva Canvas Editor</h1>
-     <SaveLoadDemo />
+      <SupabaseConnect />
     </div>
     </main>
   )
