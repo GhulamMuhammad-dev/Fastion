@@ -19,10 +19,19 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body>
+        <div className="min-h-screen flex flex-col">
+          <header className="h-14 flex items-center px-4 bg-white border-b">
+            <div className="font-semibold text-lg">Loomotion</div>
+            <div className="ml-auto flex items-center gap-3">
+              <button className="px-3 py-1 rounded bg-slate-100">Export</button>
+            </div>
+          </header>
+
+          <main className="flex-1 p-4">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
